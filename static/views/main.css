@@ -8,11 +8,7 @@ body {
   display: flex;
   flex-direction: column;
   font-family: "Poppins", sans-serif;
-  background-color: rgb(236, 225, 225);
-}
-
-.realTime{
-  font-weight: 100;
+  background-color: rgb(220, 236, 232);
 }
 
 header {
