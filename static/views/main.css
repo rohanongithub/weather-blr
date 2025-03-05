@@ -8,7 +8,11 @@ body {
   display: flex;
   flex-direction: column;
   font-family: "Poppins", sans-serif;
-  background-color: whitesmoke;
+  background-color: rgb(236, 225, 225);
+}
+
+.realTime{
+  font-weight: 100;
 }
 
 header {
@@ -27,7 +31,7 @@ header {
 }
 
 .temperature {
-  font-size: 150px;
+  font-size: 100px;
   font-weight: 150;
   color: #2c3e50;
   text-align: center;
@@ -35,4 +39,5 @@ header {
 
 footer{
   padding-left: 50%;
+  
 }
