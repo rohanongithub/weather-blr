@@ -1,10 +1,33 @@
+// Configuration
+const CONFIG = {
+  API_KEY: "8de8f3cad6c44ab5978101630250503",
+  LOCATION: "Bengaluru",
+  UPDATE_INTERVAL: 300000, // 5 minutes in milliseconds
+};
+
+// UI Elements
+const UI = {
+  tempValue: document.querySelector(".temp-value"),
+  loadingSpinner: document.querySelector(".loading-spinner"),
+  errorMessage: document.querySelector(".error-message"),
+  weatherIcons: document.querySelectorAll(".temperature svg"),
+  timeElement: document.querySelector(".realTime")
+};
+
+function showLoading() {
+  if (UI.loadingSpinner) UI.loadingSpinner.style.display = "inline";
+  if (UI.errorMessage) UI.errorMessage.style.display = "none";
+}
+
+function showError() {
+  if (UI.loadingSpinner) UI.loadingSpinner.style.display = "none";
+  if (UI.errorMessage) UI.errorMessage.style.display = "inline";
+}
 
 async function getWeatherData() {
+  showLoading();
   try {
-    const apiKey = "8de8f3cad6c44ab5978101630250503"; // Replace with a valid API key
-    const location = "Bengaluru";
-    const url = `http://api.weatherapi.com/v1/current.json?key=${apiKey}&q=${location}`;
-
+    const url = `https://api.weatherapi.com/v1/current.json?key=${CONFIG.API_KEY}&q=${CONFIG.LOCATION}`;
     const response = await fetch(url);
 
     if (!response.ok) {
@@ -12,79 +35,85 @@ async function getWeatherData() {
     }
 
     const data = await response.json();
-    console.log("API Response:", data); // Debugging
-
-    // Update only the temperature text
-    document.querySelector(
-      ".temp-value"
-    ).textContent = `${data.current.temp_c}°C`;
+    
+    // Update temperature with error handling
+    if (UI.tempValue) {
+      UI.tempValue.textContent = `${data.current.temp_c}°C`;
+    }
 
     // Extract Bengaluru's local hour
-    const localTime = data.location.localtime; // Example: "2025-03-05 18:30"
-    const currentHour = parseInt(
-      localTime.split(" ")[1].split(":")[0],
-      10
-    ); // Extract hour
+    const localTime = data.location.localtime;
+    const currentHour = parseInt(localTime.split(" ")[1].split(":")[0], 10);
 
-    // Select all SVG icons inside .temperature
-    const icons = document.querySelectorAll(".temperature svg");
+    // Update weather icon
+    updateWeatherIcon(currentHour);
+    
+    // Hide loading spinner on success
+    if (UI.loadingSpinner) UI.loadingSpinner.style.display = "none";
+  } catch (error) {
+    console.error("Error fetching weather data:", error.message);
+    showError();
+  }
+}
+
+function updateWeatherIcon(currentHour) {
+  try {
+    if (!UI.weatherIcons.length) {
+      console.warn("No weather icons found in the DOM");
+      return;
+    }
 
     // Hide all icons initially
-    icons.forEach((icon) => (icon.style.display = "none"));
+    UI.weatherIcons.forEach((icon) => (icon.style.display = "none"));
 
     // Select the appropriate SVG based on the time
     let selectedIcon;
     if (currentHour >= 4 && currentHour < 7) {
-      selectedIcon = document.querySelector(".bi-sunset-fill"); // Sunrise
+      selectedIcon = document.querySelector(".bi-sunset-fill");
     } else if (currentHour >= 7 && currentHour < 17) {
-      selectedIcon = document.querySelector(".bi-brightness-high-fill"); // Daytime Sun
+      selectedIcon = document.querySelector(".bi-brightness-high-fill");
     } else if (currentHour >= 17 && currentHour < 19) {
-      selectedIcon = document.querySelector(
-        ".bi-brightness-alt-high-fill"
-      ); // Sunset
+      selectedIcon = document.querySelector(".bi-brightness-alt-high-fill");
     } else {
-      selectedIcon = document.querySelector(".bi-moon-fill"); // Night
+      selectedIcon = document.querySelector(".bi-moon-fill");
     }
 
     // Display the selected icon
     if (selectedIcon) {
       selectedIcon.style.display = "inline";
     } else {
-      console.error("No matching SVG found for current time.");
+      console.warn("No matching SVG found for current time.");
     }
   } catch (error) {
-    console.error("Error fetching weather data:", error.message);
+    console.error("Error updating weather icon:", error.message);
   }
 }
-//browser tod function - infinite recursion
-//   function updateDate(){
-//     const d = new Date();
-//     document.querySelector(".realTime").textContent = d;
-//     updateDate();
-//   }
 
-//better time function
 function updateDate() {
-const d = new Date();
-document.querySelector(".realTime").textContent = d.toLocaleTimeString('en-US', { 
-    hour: '2-digit', 
-    minute: '2-digit', 
-    month: 'short', 
-    day: 'numeric' 
-});; // Format time
+  try {
+    const d = new Date();
+    if (UI.timeElement) {
+      UI.timeElement.textContent = d.toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        month: 'short',
+        day: 'numeric',
+        hour12: true
+      });
+    }
+  } catch (error) {
+    console.error("Error updating date:", error.message);
+  }
 }
 
+// Initialize the application
+document.addEventListener("DOMContentLoaded", () => {
+  // Initial calls
+  getWeatherData();
+  updateDate();
 
-
-
-// Call function after DOM loads
-document.addEventListener("DOMContentLoaded", getWeatherData);
-// Update every second
-setInterval(getWeatherData, 60000);
-setInterval(updateDate, 1000);
-
-
-// Initial call
-getWeatherData();
-updateDate();
+  // Set up intervals
+  setInterval(getWeatherData, CONFIG.UPDATE_INTERVAL);
+  setInterval(updateDate, 1000);
+});
 

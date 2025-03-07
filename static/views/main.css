@@ -37,3 +37,34 @@ footer{
   padding-left: 50%;
   
 }
+
+.loading-spinner {
+  display: inline-block;
+  animation: spin 1s linear infinite;
+  margin-left: 10px;
+}
+
+.loading-spinner i {
+  font-size: 24px;
+  color: #666;
+}
+
+.error-message {
+  display: inline-flex;
+  align-items: center;
+  color: #dc3545;
+  margin-left: 10px;
+}
+
+.error-message i {
+  margin-right: 5px;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
